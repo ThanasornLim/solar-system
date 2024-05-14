@@ -1,5 +1,5 @@
 import { DisplayMode, ZoomMode } from "@/views/galaxy/solar.system.type";
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 
 interface ControlPanelProps {
 	displayMode: DisplayMode;
@@ -7,9 +7,19 @@ interface ControlPanelProps {
 	bodyRef: React.RefObject<HTMLDivElement>;
 	setDisplayMode: React.Dispatch<React.SetStateAction<DisplayMode>>;
 	setZoomMode: React.Dispatch<React.SetStateAction<ZoomMode>>;
+	isGameFinishedRound: boolean;
+	setIsGameFinishedRound: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const ControlPanel = ({ displayMode, zoomMode, bodyRef, setDisplayMode, setZoomMode }: ControlPanelProps) => {
+const ControlPanel = ({
+	displayMode,
+	zoomMode,
+	bodyRef,
+	setDisplayMode,
+	setZoomMode,
+	isGameFinishedRound,
+	setIsGameFinishedRound,
+}: ControlPanelProps) => {
 	const setView3D = () => {
 		if (displayMode === "2D") {
 			bodyRef.current!.classList.remove("view-2D");
@@ -21,7 +31,7 @@ const ControlPanel = ({ displayMode, zoomMode, bodyRef, setDisplayMode, setZoomM
 		bodyRef.current!.classList.add("view-2D");
 		setDisplayMode("2D");
 	};
-	const setZoom = () => {
+	const setZoom = useCallback(() => {
 		bodyRef.current!.classList.toggle("zoom-large");
 		if (zoomMode === "close") {
 			bodyRef.current!.classList.remove("zoom-close");
@@ -32,7 +42,7 @@ const ControlPanel = ({ displayMode, zoomMode, bodyRef, setDisplayMode, setZoomM
 		bodyRef.current!.classList.remove("zoom-large");
 		bodyRef.current!.classList.add("zoom-close");
 		setZoomMode("close");
-	};
+	}, [bodyRef, setZoomMode, zoomMode]);
 
 	// const setSpeed = () => {
 	// 	setView("scale-stretched set-speed");
@@ -43,6 +53,18 @@ const ControlPanel = ({ displayMode, zoomMode, bodyRef, setDisplayMode, setZoomM
 	// const setDistance = () => {
 	// 	setView("scale-d set-distance");
 	// };
+
+	useEffect(() => {
+		if (isGameFinishedRound) {
+			setZoom();
+			setIsGameFinishedRound(false);
+			let timer = setTimeout(() => {
+				console.log("SET ZOOM");
+				// setZoom();
+			}, 1000);
+			return () => clearTimeout(timer);
+		}
+	}, [isGameFinishedRound, setIsGameFinishedRound, setZoom]);
 
 	return (
 		<div id="controls">
